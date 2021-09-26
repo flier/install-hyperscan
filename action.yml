@@ -1,58 +1,84 @@
 name: "Hyperscan"
-description: "Download and install Hyperscan"
+description: "Download and install Hyperscan."
 inputs:
   hyperscan_version:
-    description: "The version of Hyperscan"
+    description: "The version of Hyperscan library."
     required: false
     default: "5.4.0"
   pcre_version:
-    description: "The version of PCRE"
+    description: "The version of PCRE library."
     required: false
     default: "8.45"
-  hyperscan_dir:
-    description: "The directory of Hyperscan"
+  src_dir:
+    description: "The directory of Hyperscan source."
     required: false
-    default: "hyperscan"
-  install_dir:
-    description: "The directory of installed library"
+    default: "hyperscan_src"
+  build_type:
+    description: "Define which kind of build to generate."
+    required: false
+    default: "RelWithDebInfo"
+  build_static_lib:
+    description: "Build Hyperscan as a static library."
+    required: false
+    default: "off"
+  build_shared_lib:
+    description: "Build Hyperscan as a shared library."
+    required: false
+    default: "off"
+  build_static_and_shared_lib:
+    description: "Build both static and shared Hyperscan libs."
+    required: false
+    default: "off"
+  debug_output:
+    description: "Enable very verbose debug output."
+    required: false
+    default: "off"
+  install_prefix:
+    description: "Install directory for install target"
     required: false
     default: "/usr/local"
-  cached:
-    description: "Whether the library were cached."
-    required: false
-outputs:
-  random-number:
-    description: "Random number"
-    value: ${{ steps.random-number-generator.outputs.random-id }}
 runs:
   using: "composite"
   steps:
-    - name: "Download Hyperscan"
+    - name: Download Hyperscan ${{ inputs.hyperscan_version }}
       id: download-hyperscan
       shell: bash
       run: |
         wget https://github.com/intel/hyperscan/archive/refs/tags/v${{ inputs.hyperscan_version }}.tar.gz -O hyperscan.tar.gz
-        mkdir ${{ input.src_dir }}
-        tar xf hyperscan.tar.gz -C hyperscan --strip-components=1
+        mkdir ${{ inputs.src_dir }}
+        tar xf hyperscan.tar.gz -C ${{ inputs.src_dir }} --strip-components=1
         rm hyperscan.tar.gz
 
-    - name: "Download PCRE"
+    - name: Download PCRE ${{ inputs.pcre_version }}
       id: download-pcre
       shell: bash
       run: |
         wget https://sourceforge.net/projects/pcre/files/pcre/${{ inputs.pcre_version }}/pcre-${{ inputs.pcre_version }}.tar.gz/download -O pcre.tar.gz
-        mkdir ${{ input.src_dir }}/pcre
-        tar xf pcre.tar.gz -C ${{ input.src_dir }}/pcre --strip-components=1
+        mkdir ${{ inputs.src_dir }}/pcre
+        tar xf pcre.tar.gz -C ${{ inputs.src_dir }}/pcre --strip-components=1
         rm pcre.tar.gz
 
-    - name: "Build Hyperscan"
+    - name: Build Hyperscan
       id: build-hyperscan
-      working-directory: ${{ input.src_dir }}
+      working-directory: ${{ inputs.src_dir }}
       shell: bash
       run: |
         mkdir build
         cd build
-        cmake -G Ninja -DBUILD_STATIC_LIBS=on -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ inputs.install_dir }} ..
+        cmake -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} \
+          -DBUILD_STATIC_LIBS=${{ inputs.build_static_lib }} \
+          -DBUILD_SHARED_LIBS=${{ inputs.build_shared_lib }} \
+          -DBUILD_STATIC_AND_SHARED=${{ inputs.build_static_and_shared_lib }} \
+          -DDEBUG_OUTPUT=${{ inputs.debug_output }} \
+          -DCMAKE_INSTALL_PREFIX=${{ inputs.install_prefix }} \
+          ..
         ninja
+
+    - name: Install Hyperscan
+      id: install-hyperscan
+      working-directory: ${{ inputs.src_dir }}/build
+      shell: bash
+      run: |
         ninja install
-        cp lib/lib*.a ${{ inputs.install_dir }}/lib/
+        cp -v lib/lib*.a ${{ inputs.install_prefix }}/lib/

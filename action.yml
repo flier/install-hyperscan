@@ -1,5 +1,9 @@
-name: "Hyperscan"
+name: "Install Hyperscan"
 description: "Download and install Hyperscan."
+author: "Flier Lu <flier.lu@gmail.com"
+branding:
+  icon: "download-cloud"
+  color: "blue"
 inputs:
   hyperscan_version:
     description: "The version of Hyperscan library."

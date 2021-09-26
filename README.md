@@ -91,6 +91,22 @@ jobs:
           install_prefix: ${{ github.workspace }}/dist/
 ```
 
+## Inputs
+
+### Parameters
+
+|name|description|default|
+|---|---|---|
+|`hyperscan_version`|The version of Hyperscan library.|5.4.0|
+|`pcre_version`|The version of PCRE library.|8.45|
+|`src_dir`|The directory of Hyperscan source.|hyperscan_src|
+|`build_type`|Define which kind of build to generate.|RelWithDebInfo|
+|`build_static_lib`|Build Hyperscan as a static library.|off|
+|`build_shared_lib`|Build Hyperscan as a shared library.|off|
+|`build_static_and_shared_lib`|Build both static and shared Hyperscan libs.|off|
+|`debug_output`|Enable very verbose debug output.|off|
+|`install_prefix`|Install directory for install target|/usr/local|
+
 ## License
 
 This project is licensed under either of Apache License ([LICENSE-APACHE](LICENSE-APACHE)) or MIT license ([LICENSE-MIT](LICENSE-MIT)) at your option.

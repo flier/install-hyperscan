@@ -1,0 +1,58 @@
+name: "Hyperscan"
+description: "Download and install Hyperscan"
+inputs:
+  hyperscan_version:
+    description: "The version of Hyperscan"
+    required: false
+    default: "5.4.0"
+  pcre_version:
+    description: "The version of PCRE"
+    required: false
+    default: "8.45"
+  hyperscan_dir:
+    description: "The directory of Hyperscan"
+    required: false
+    default: "hyperscan"
+  install_dir:
+    description: "The directory of installed library"
+    required: false
+    default: "/usr/local"
+  cached:
+    description: "Whether the library were cached."
+    required: false
+outputs:
+  random-number:
+    description: "Random number"
+    value: ${{ steps.random-number-generator.outputs.random-id }}
+runs:
+  using: "composite"
+  steps:
+    - name: "Download Hyperscan"
+      id: download-hyperscan
+      shell: bash
+      run: |
+        wget https://github.com/intel/hyperscan/archive/refs/tags/v${{ inputs.hyperscan_version }}.tar.gz -O hyperscan.tar.gz
+        mkdir ${{ input.src_dir }}
+        tar xf hyperscan.tar.gz -C hyperscan --strip-components=1
+        rm hyperscan.tar.gz
+
+    - name: "Download PCRE"
+      id: download-pcre
+      shell: bash
+      run: |
+        wget https://sourceforge.net/projects/pcre/files/pcre/${{ inputs.pcre_version }}/pcre-${{ inputs.pcre_version }}.tar.gz/download -O pcre.tar.gz
+        mkdir ${{ input.src_dir }}/pcre
+        tar xf pcre.tar.gz -C ${{ input.src_dir }}/pcre --strip-components=1
+        rm pcre.tar.gz
+
+    - name: "Build Hyperscan"
+      id: build-hyperscan
+      working-directory: ${{ input.src_dir }}
+      shell: bash
+      run: |
+        mkdir build
+        cd build
+        cmake -G Ninja -DBUILD_STATIC_LIBS=on -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ inputs.install_dir }} ..
+        ninja
+        ninja install
+        cp lib/lib*.a ${{ inputs.install_dir }}/lib/

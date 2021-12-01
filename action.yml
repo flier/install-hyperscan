@@ -57,7 +57,7 @@ runs:
   using: "composite"
   steps:
     - name: Cache Hyperscan library
-      if: input.use_cache
+      if: inputs.use_cache
       id: cache-hyperscan
       uses: actions/cache@v2
       env:
@@ -67,7 +67,7 @@ runs:
         key: ${{ runner.os }}-build-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}
 
     - name: Download Hyperscan ${{ inputs.hyperscan_version }}
-      if: ${{ !input.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
+      if: ${{ !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
       id: download-hyperscan
       shell: bash
       run: |
@@ -77,7 +77,7 @@ runs:
         rm hyperscan.tar.gz
 
     - name: Download PCRE ${{ inputs.pcre_version }}
-      if: ${{ !input.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
+      if: ${{ !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
       id: download-pcre
       shell: bash
       run: |
@@ -87,7 +87,7 @@ runs:
         rm pcre.tar.gz
 
     - name: Build Hyperscan
-      if: ${{ !input.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
+      if: ${{ !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
       id: build-hyperscan
       working-directory: ${{ inputs.src_dir }}
       shell: bash
@@ -105,7 +105,7 @@ runs:
         ninja
 
     - name: Install Hyperscan
-      if: ${{ !input.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
+      if: ${{ !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
       id: install-hyperscan
       working-directory: ${{ inputs.src_dir }}/build
       shell: bash
@@ -114,7 +114,7 @@ runs:
         cp -v lib/lib*.a ${{ inputs.install_prefix }}/lib/
 
     - name: Upload Artifact
-      if: ${{ input.upload_artifact && !steps.cache-hyperscan.outputs.cache-hit }}
+      if: ${{ inputs.upload_artifact && !steps.cache-hyperscan.outputs.cache-hit }}
       uses: actions/upload-artifact@v2
       with:
         name: ${{ runner.os }}-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}

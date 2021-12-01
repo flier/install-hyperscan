@@ -45,28 +45,14 @@ inputs:
     description: "Allows caching build outputs to improve execution time."
     required: false
     default: "false"
-  cache_key:
-    description: "An explicit key for restoring and saving the cache"
-    required: false
-    default: ${{ runner.os }}-build-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}
   upload_artifact:
     description: "Upload and share library between jobs and store data once a workflow is complete."
     required: false
     default: "false"
-  artifact_name:
-    description: "Upload an artifact as name"
-    required: false
-    default: ${{ runner.os }}-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}
 outputs:
   cache-hit:
     description: "A boolean value to indicate an exact match was found for the cache key"
     value: ${{ steps.cache-hyperscan.outputs.cache-hit }}
-  cache-key:
-    description: "An explicit key for restoring and saving the cache"
-    value: ${{ input.cache_key }}
-  artifact_name:
-    description: "Upload an artifact as name"
-    value: ${{ inputs.artifact_name }}
 runs:
   using: "composite"
   steps:
@@ -78,7 +64,7 @@ runs:
         cache-name: cache-hyperscan-library
       with:
         path: ${{ install.install_prefix }}
-        key: ${{ input.cache_key }}
+        key: ${{ runner.os }}-build-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}
 
     - name: Download Hyperscan ${{ inputs.hyperscan_version }}
       if: ${{ !input.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
@@ -131,6 +117,6 @@ runs:
       if: ${{ input.upload_artifact && !steps.cache-hyperscan.outputs.cache-hit }}
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ input.artifact_name }}
+        name: ${{ runner.os }}-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}
         path: ${{ inputs.install_prefix }}
         if-no-files-found: error

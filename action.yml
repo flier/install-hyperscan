@@ -68,7 +68,7 @@ runs:
         cache-name: cache-hyperscan-library
       with:
         path: ${{ inputs.install_prefix }}
-        key: ${{ runner.os }}-build-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}
+        key: ${{ runner.os }}-build-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}-${{ secrets.HYPERSCAN_CACHE_VERSION }}
 
     - name: Install Linux runtime dependencies
       if: inputs.install_dependencies && runner.os == 'Linux'

@@ -13,6 +13,10 @@ inputs:
     description: "The version of PCRE library."
     required: false
     default: "8.45"
+  install_dependencies:
+    description: "Install dependencies for building."
+    required: false
+    default: "true"
   src_dir:
     description: "The directory of Hyperscan source."
     required: false
@@ -65,6 +69,21 @@ runs:
       with:
         path: ${{ inputs.install_prefix }}
         key: ${{ runner.os }}-build-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}
+
+    - name: Install Linux dependencies
+      if: ${{ ( !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit ) && runner.os == 'Linux' }}
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -yq build-essential ca-certificates cmake libboost-dev libbz2-dev libpcap-dev \
+          ninja-build pkg-config python2.7 ragel wget zlib1g-dev
+
+    - name: Install MacOS dependencies
+      if: ${{ ( !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit ) && runner.os == 'macOS' }}
+      shell: bash
+      run: |
+        brew update
+        brew install pkg-config libpcap ragel cmake boost ninja lzlib wget
 
     - name: Download Hyperscan ${{ inputs.hyperscan_version }}
       if: ${{ !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}

@@ -70,20 +70,32 @@ runs:
         path: ${{ inputs.install_prefix }}
         key: ${{ runner.os }}-build-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}
 
-    - name: Install Linux dependencies
-      if: ${{ ( !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit ) && runner.os == 'Linux' }}
+    - name: Install Linux runtime dependencies
+      if: inputs.install_dependencies && runner.os == 'Linux'
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt-get install -yq build-essential ca-certificates cmake libboost-dev libbz2-dev libpcap-dev \
-          ninja-build pkg-config python2.7 ragel wget zlib1g-dev
+        sudo apt-get install -yq libpcap-dev pkg-config
 
-    - name: Install MacOS dependencies
-      if: ${{ ( !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit ) && runner.os == 'macOS' }}
+    - name: Install Linux build dependencies
+      if: ${{ inputs.install_dependencies && runner.os == 'Linux' && ( !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit ) }}
+      shell: bash
+      run: |
+        sudo apt-get install -yq build-essential ca-certificates cmake libboost-dev libbz2-dev \
+          ninja-build python2.7 ragel wget zlib1g-dev
+
+    - name: Install MacOS runtime dependencies
+      if: inputs.install_dependencies && runner.os == 'macOS'
       shell: bash
       run: |
         brew update
-        brew install pkg-config libpcap ragel cmake boost ninja lzlib wget
+        brew install pkg-config libpcap
+
+    - name: Install MacOS build dependencies
+      if: ${{ inputs.install_dependencies && runner.os == 'macOS' && ( !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit ) }}
+      shell: bash
+      run: |
+        brew install ragel cmake boost ninja lzlib wget
 
     - name: Download Hyperscan ${{ inputs.hyperscan_version }}
       if: ${{ !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}

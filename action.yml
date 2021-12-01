@@ -48,7 +48,11 @@ inputs:
   use_cache:
     description: "Allows caching build outputs to improve execution time."
     required: false
-    default: "false"
+    default: "true"
+  cache_key:
+    description: "An explicit key for restoring and saving the cache"
+    required: false
+    default: ""
   upload_artifact:
     description: "Upload and share library between jobs and store data once a workflow is complete."
     required: false
@@ -61,14 +65,24 @@ runs:
   using: "composite"
   steps:
     - name: Cache Hyperscan library
-      if: inputs.use_cache
+      if: ${{ inputs.use_cache && inputs.cache_key == '' }}
       id: cache-hyperscan
       uses: actions/cache@v2
       env:
         cache-name: cache-hyperscan-library
       with:
         path: ${{ inputs.install_prefix }}
-        key: ${{ runner.os }}-build-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}-${{ secrets.HYPERSCAN_CACHE_VERSION }}
+        key: ${{ runner.os }}-build-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}
+
+    - name: Cache Hyperscan library
+      if: ${{ inputs.use_cache && inputs.cache_key != '' }}
+      id: cache-hyperscan
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-hyperscan-library
+      with:
+        path: ${{ inputs.install_prefix }}
+        key: ${{ inputs.cache_key }}
 
     - name: Install Linux runtime dependencies
       if: inputs.install_dependencies && runner.os == 'Linux'

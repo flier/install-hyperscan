@@ -65,17 +65,7 @@ runs:
   using: "composite"
   steps:
     - name: Cache Hyperscan library
-      if: ${{ inputs.use_cache && inputs.cache_key == '' }}
-      id: cache-hyperscan
-      uses: actions/cache@v2
-      env:
-        cache-name: cache-hyperscan-library
-      with:
-        path: ${{ inputs.install_prefix }}
-        key: ${{ runner.os }}-build-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}
-
-    - name: Cache Hyperscan library
-      if: ${{ inputs.use_cache && inputs.cache_key != '' }}
+      if: ${{ inputs.use_cache }}
       id: cache-hyperscan
       uses: actions/cache@v2
       env:

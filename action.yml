@@ -41,10 +41,47 @@ inputs:
     description: "Install directory for install target"
     required: false
     default: "/usr/local"
+  use_cache:
+    description: "Allows caching build outputs to improve execution time."
+    required: false
+    default: "false"
+  cache_key:
+    description: "An explicit key for restoring and saving the cache"
+    required: false
+    default: ${{ runner.os }}-build-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}
+  upload_artifact:
+    description: "Upload and share library between jobs and store data once a workflow is complete."
+    required: false
+    default: "false"
+  artifact_name:
+    description: "Upload an artifact as name"
+    required: false
+    default: ${{ runner.os }}-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}
+outputs:
+  cache-hit:
+    description: "A boolean value to indicate an exact match was found for the cache key"
+    value: ${{ steps.cache-hyperscan.outputs.cache-hit }}
+  cache-key:
+    description: "An explicit key for restoring and saving the cache"
+    value: ${{ input.cache_key }}
+  artifact_name:
+    description: "Upload an artifact as name"
+    value: ${{ inputs.artifact_name }}
 runs:
   using: "composite"
   steps:
+    - name: Cache Hyperscan library
+      if: input.use_cache
+      id: cache-hyperscan
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-hyperscan-library
+      with:
+        path: ${{ install.install_prefix }}
+        key: ${{ input.cache_key }}
+
     - name: Download Hyperscan ${{ inputs.hyperscan_version }}
+      if: ${{ !input.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
       id: download-hyperscan
       shell: bash
       run: |
@@ -54,6 +91,7 @@ runs:
         rm hyperscan.tar.gz
 
     - name: Download PCRE ${{ inputs.pcre_version }}
+      if: ${{ !input.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
       id: download-pcre
       shell: bash
       run: |
@@ -63,6 +101,7 @@ runs:
         rm pcre.tar.gz
 
     - name: Build Hyperscan
+      if: ${{ !input.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
       id: build-hyperscan
       working-directory: ${{ inputs.src_dir }}
       shell: bash
@@ -80,9 +119,18 @@ runs:
         ninja
 
     - name: Install Hyperscan
+      if: ${{ !input.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
       id: install-hyperscan
       working-directory: ${{ inputs.src_dir }}/build
       shell: bash
       run: |
         ninja install
         cp -v lib/lib*.a ${{ inputs.install_prefix }}/lib/
+
+    - name: Upload Artifact
+      if: ${{ input.upload_artifact && !steps.cache-hyperscan.outputs.cache-hit }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ input.artifact_name }}
+        path: ${{ inputs.install_prefix }}
+        if-no-files-found: error

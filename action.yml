@@ -63,7 +63,7 @@ runs:
       env:
         cache-name: cache-hyperscan-library
       with:
-        path: ${{ install.install_prefix }}
+        path: ${{ inputs.install_prefix }}
         key: ${{ runner.os }}-build-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}
 
     - name: Download Hyperscan ${{ inputs.hyperscan_version }}

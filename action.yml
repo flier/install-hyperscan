@@ -78,55 +78,68 @@ runs:
       if: inputs.install_dependencies && runner.os == 'Linux'
       shell: bash
       run: |
+        echo "::group::Install Linux runtime dependencies"
         sudo apt-get update
         sudo apt-get install -yq libpcap-dev pkg-config
+        echo "::endgroup::"
 
     - name: Install Linux build dependencies
       if: ${{ inputs.install_dependencies && runner.os == 'Linux' && ( !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit ) }}
       shell: bash
       run: |
+        echo "::group::Install Linux build dependencies"
         sudo apt-get install -yq build-essential ca-certificates cmake libboost-dev libbz2-dev \
           ninja-build python2.7 ragel wget zlib1g-dev
+        echo "::endgroup::"
 
     - name: Install MacOS runtime dependencies
       if: inputs.install_dependencies && runner.os == 'macOS'
       shell: bash
       run: |
+        echo "::group::Install MacOS runtime dependencies"
         brew update
         brew install pkg-config libpcap
+        echo "::endgroup::"
 
     - name: Install MacOS build dependencies
       if: ${{ inputs.install_dependencies && runner.os == 'macOS' && ( !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit ) }}
       shell: bash
       run: |
+        echo "::group::Install MacOS build dependencies"
         brew install ragel cmake boost ninja lzlib wget
+        echo "::endgroup::"
 
     - name: Download Hyperscan ${{ inputs.hyperscan_version }}
       if: ${{ !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
       id: download-hyperscan
       shell: bash
       run: |
+        echo "::group::Download Hyperscan ${{ inputs.hyperscan_version }}"
         wget https://github.com/intel/hyperscan/archive/refs/tags/v${{ inputs.hyperscan_version }}.tar.gz -O hyperscan.tar.gz
         mkdir ${{ inputs.src_dir }}
         tar xf hyperscan.tar.gz -C ${{ inputs.src_dir }} --strip-components=1
         rm hyperscan.tar.gz
+        echo "::endgroup::"
 
     - name: Download PCRE ${{ inputs.pcre_version }}
       if: ${{ !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
       id: download-pcre
       shell: bash
       run: |
+        echo "::group::Download PCRE ${{ inputs.pcre_version }}"
         wget https://sourceforge.net/projects/pcre/files/pcre/${{ inputs.pcre_version }}/pcre-${{ inputs.pcre_version }}.tar.gz/download -O pcre.tar.gz
         mkdir ${{ inputs.src_dir }}/pcre
         tar xf pcre.tar.gz -C ${{ inputs.src_dir }}/pcre --strip-components=1
         rm pcre.tar.gz
+        echo "::endgroup::"
 
-    - name: Build Hyperscan
+    - name: Build Hyperscan ${{ inputs.hyperscan_version }}
       if: ${{ !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
       id: build-hyperscan
       working-directory: ${{ inputs.src_dir }}
       shell: bash
       run: |
+        echo "::group::Build Hyperscan ${{ inputs.hyperscan_version }} with PCRE ${{ inputs.pcre_version }}"
         mkdir build
         cd build
         cmake -G Ninja \
@@ -138,15 +151,18 @@ runs:
           -DCMAKE_INSTALL_PREFIX=${{ inputs.install_prefix }} \
           ..
         ninja
+        echo "::endgroup::"
 
-    - name: Install Hyperscan
+    - name: Install Hyperscan ${{ inputs.hyperscan_version }}
       if: ${{ !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
       id: install-hyperscan
       working-directory: ${{ inputs.src_dir }}/build
       shell: bash
       run: |
+        echo "::group::Install Hyperscan ${{ inputs.hyperscan_version }} with PCRE ${{ inputs.pcre_version }}"
         ninja install
         cp -v lib/lib*.a ${{ inputs.install_prefix }}/lib/
+        echo "::endgroup::"
 
     - name: Upload Artifact
       if: ${{ inputs.upload_artifact && !steps.cache-hyperscan.outputs.cache-hit }}

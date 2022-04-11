@@ -13,13 +13,11 @@ jobs:
   build-and-test:
     runs-on: ubuntu-20.04
     steps:
-      - run: |
-          sudo apt-get update
-          sudo apt-get install -yq build-essential ca-certificates cmake libboost-dev libbz2-dev libpcap-dev \
-            ninja-build pkg-config python2.7 ragel wget zlib1g-dev
       - uses: flier/install-hyperscan@v1
         with:
-          hyperscan_version: 5.4.0 # The Hyperscan version to download (if necessary) and use.
+          hyperscan_version: 5.4.0    # The Hyperscan version to download (if necessary) and use.
+          pcre: 8.45                  # The PCRE version to download (if necessary) and use to build Chimera.
+          install_dependencies: true
 ```
 
 ### Matrix Testing
@@ -41,24 +39,12 @@ jobs:
             pcre: 8.41
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Install Linux dependencies
-        if: startsWith(matrix.os, 'ubuntu-')
-        run: |
-          sudo apt-get update
-          sudo apt-get install -yq build-essential ca-certificates cmake libboost-dev libbz2-dev libpcap-dev \
-            ninja-build pkg-config python2.7 ragel wget zlib1g-dev
-
-      - name: Install MacOS dependencies
-        if: startsWith(matrix.os, 'macos-')
-        run: |
-          brew update
-          brew install pkg-config libpcap ragel cmake boost ninja lzlib wget
-
       - name: Install Hyperscan ${{ matrix.hyperscan }} with PCRE ${{ matrix.pcre }}
         uses: flier/install-hyperscan@v1
         with:
           hyperscan_version: ${{ matrix.hyperscan }}
           pcre_version: ${{ matrix.pcre }}
+          install_dependencies: true
 ```
 
 ### Cached
@@ -68,20 +54,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-20.04
     steps:
-      - run: |
-          sudo apt-get update
-          sudo apt-get install -yq build-essential ca-certificates cmake libboost-dev libbz2-dev libpcap-dev \
-            ninja-build pkg-config python2.7 ragel wget zlib1g-dev
-
-      - name: Cache Hyperscan library
-        id: cache-hyperscan
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-hyperscan-library
-        with:
-          path: ${{ github.workspace }}/dist
-          key: ${{ runner.os }}-build-hyperscan
-
       - name: Install Hyperscan ${{ matrix.hyperscan }} with PCRE ${{ matrix.pcre }}
         if: steps.cache-hyperscan.outputs.cache-hit == false
         uses: flier/install-hyperscan@v1
@@ -89,23 +61,29 @@ jobs:
           hyperscan_version: 5.4.0
           build_static_lib: on
           install_prefix: ${{ github.workspace }}/dist/
+          install_dependencies: true
+          use_cache: true
 ```
 
 ## Inputs
 
 ### Parameters
 
-|name|description|default|
-|---|---|---|
-|`hyperscan_version`|The version of Hyperscan library.|5.4.0|
-|`pcre_version`|The version of PCRE library.|8.45|
-|`src_dir`|The directory of Hyperscan source.|hyperscan_src|
-|`build_type`|Define which kind of build to generate.|RelWithDebInfo|
-|`build_static_lib`|Build Hyperscan as a static library.|off|
-|`build_shared_lib`|Build Hyperscan as a shared library.|off|
-|`build_static_and_shared_lib`|Build both static and shared Hyperscan libs.|off|
-|`debug_output`|Enable very verbose debug output.|off|
-|`install_prefix`|Install directory for install target|/usr/local|
+| name                          | description                                                                       | default        |
+| ----------------------------- | --------------------------------------------------------------------------------- | -------------- |
+| `hyperscan_version`           | The version of Hyperscan library.                                                 | 5.4.0          |
+| `pcre_version`                | The version of PCRE library.                                                      | 8.45           |
+| `install_dependencies`        | Install dependencies for building.                                                | Linux or MacOS |
+| `src_dir`                     | The directory of Hyperscan source.                                                | hyperscan_src  |
+| `build_type`                  | Define which kind of build to generate.                                           | RelWithDebInfo |
+| `build_static_lib`            | Build Hyperscan as a static library.                                              | on             |
+| `build_shared_lib`            | Build Hyperscan as a shared library.                                              | off            |
+| `build_static_and_shared_lib` | Build both static and shared Hyperscan libs.                                      | off            |
+| `debug_output`                | Enable very verbose debug output.                                                 | off            |
+| `install_prefix`              | Install directory for install target                                              | /usr/local     |
+| `use_cache`                   | Allows caching build outputs to improve execution time.                           | false          |
+| `cache_key`                   | An explicit key for restoring and saving the cache                                |                |
+| `upload_artifact`             | Upload and share library between jobs and store data once a workflow is complete. | false          |
 
 ## License
 

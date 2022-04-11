@@ -28,7 +28,7 @@ inputs:
   build_static_lib:
     description: "Build Hyperscan as a static library."
     required: false
-    default: "off"
+    default: "on"
   build_shared_lib:
     description: "Build Hyperscan as a shared library."
     required: false
@@ -50,7 +50,7 @@ inputs:
     required: false
     default: "false"
   cache_key:
-    description: "An explicit key for restoring and saving the cache"
+    description: "An explicit key for restoring and saving the cache."
     required: false
     default: ""
   upload_artifact:

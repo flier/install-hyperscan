@@ -48,7 +48,7 @@ inputs:
   use_cache:
     description: "Allows caching build outputs to improve execution time."
     required: false
-    default: "true"
+    default: "false"
   cache_key:
     description: "An explicit key for restoring and saving the cache"
     required: false
@@ -67,7 +67,7 @@ runs:
     - name: Cache Hyperscan library
       if: ${{ inputs.use_cache }}
       id: cache-hyperscan
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       env:
         cache-name: cache-hyperscan-library
       with:

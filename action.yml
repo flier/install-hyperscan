@@ -98,7 +98,7 @@ runs:
       run: |
         echo "::group::Install MacOS runtime dependencies"
         brew update
-        brew install pkg-config libpcap
+        brew install --overwrite pkg-config libpcap
         echo "::endgroup::"
 
     - name: Install MacOS build dependencies
@@ -106,7 +106,7 @@ runs:
       shell: bash
       run: |
         echo "::group::Install MacOS build dependencies"
-        brew install ragel cmake boost ninja lzlib wget
+        brew install --overwrite ragel cmake boost ninja lzlib wget
         echo "::endgroup::"
 
     - name: Download Hyperscan ${{ inputs.hyperscan_version }}

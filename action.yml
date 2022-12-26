@@ -95,6 +95,8 @@ runs:
     - name: Install MacOS runtime dependencies
       if: inputs.install_dependencies && runner.os == 'macOS'
       shell: bash
+      env:
+        HOMEBREW_NO_INSTALL_CLEANUP: "true"
       run: |
         echo "::group::Install MacOS runtime dependencies"
         brew update
@@ -104,6 +106,8 @@ runs:
     - name: Install MacOS build dependencies
       if: ${{ inputs.install_dependencies && runner.os == 'macOS' && ( !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit ) }}
       shell: bash
+      env:
+        HOMEBREW_NO_INSTALL_CLEANUP: "true"
       run: |
         echo "::group::Install MacOS build dependencies"
         brew install --overwrite ragel cmake boost ninja lzlib wget

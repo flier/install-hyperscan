@@ -8,7 +8,7 @@ inputs:
   hyperscan_version:
     description: "The version of Hyperscan library."
     required: false
-    default: "5.4.0"
+    default: "5.4.1"
   pcre_version:
     description: "The version of PCRE library."
     required: false
@@ -140,6 +140,8 @@ runs:
       if: ${{ !inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit }}
       id: build-hyperscan
       working-directory: ${{ inputs.src_dir }}
+      env:
+        LC_ALL: C
       shell: bash
       run: |
         echo "::group::Build Hyperscan ${{ inputs.hyperscan_version }} with PCRE ${{ inputs.pcre_version }}"

@@ -134,10 +134,10 @@ runs:
       shell: bash
       run: |
         echo "::group::Download Vectorscan ${{ inputs.hyperscan_version }}"
-        wget https://github.com/VectorCamp/vectorscan/archive/refs/tags/v${{ inputs.hyperscan_version }}.tar.gz -O hyperscan.tar.gz
+        wget https://github.com/VectorCamp/vectorscan/archive/refs/tags/v${{ inputs.hyperscan_version }}.tar.gz -O vectorscan.tar.gz
         mkdir ${{ inputs.src_dir }}
-        tar xf hyperscan.tar.gz -C ${{ inputs.src_dir }} --strip-components=1
-        rm hyperscan.tar.gz
+        tar xf vectorscan.tar.gz -C ${{ inputs.src_dir }} --strip-components=1
+        rm vectorscan.tar.gz
         echo "::endgroup::"
 
     - name: Download PCRE ${{ inputs.pcre_version }}
@@ -187,8 +187,8 @@ runs:
 
     - name: Upload Artifact
       if: ${{ inputs.upload_artifact && !steps.cache-hyperscan.outputs.cache-hit }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{ runner.os }}-hyperscan-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}
+        name: ${{ runner.os }}-hyperscan-${{ inputs.vectorscan }}-${{ inputs.hyperscan_version }}-pcre-${{ inputs.pcre_version }}
         path: ${{ inputs.install_prefix }}
         if-no-files-found: error

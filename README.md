@@ -73,6 +73,7 @@ jobs:
 | ----------------------------- | --------------------------------------------------------------------------------- | -------------- |
 | `hyperscan_version`           | The version of Hyperscan library.                                                 | 5.4.0          |
 | `pcre_version`                | The version of PCRE library.                                                      | 8.45           |
+| `vectorscan`                  | Use Vectorscan instead of Hyperscan.                                              | false          |
 | `install_dependencies`        | Install dependencies for building.                                                | Linux or MacOS |
 | `src_dir`                     | The directory of Hyperscan source.                                                | hyperscan_src  |
 | `build_type`                  | Define which kind of build to generate.                                           | RelWithDebInfo |

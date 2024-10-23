@@ -130,7 +130,7 @@ runs:
 
     - name: Download Vectorscan ${{ inputs.hyperscan_version }}
       if: ${{ inputs.vectorscan && (!inputs.use_cache || !steps.cache-hyperscan.outputs.cache-hit) }}
-      id: download-hyperscan
+      id: download-vectorscan
       shell: bash
       run: |
         echo "::group::Download Vectorscan ${{ inputs.hyperscan_version }}"

@@ -170,6 +170,7 @@ runs:
           -DBUILD_STATIC_AND_SHARED=${{ inputs.build_static_and_shared_lib }} \
           -DDEBUG_OUTPUT=${{ inputs.debug_output }} \
           -DCMAKE_INSTALL_PREFIX=${{ inputs.install_prefix }} \
+          -DFAT_RUNTIME=off \
           ..
         ninja
         echo "::endgroup::"

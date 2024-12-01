@@ -93,7 +93,7 @@ runs:
       run: |
         echo "::group::Install Linux build dependencies"
         sudo apt-get install -yq build-essential ca-certificates cmake libboost-dev libbz2-dev \
-          ninja-build python2.7 ragel wget zlib1g-dev
+          ninja-build python3 ragel wget zlib1g-dev
         echo "::endgroup::"
 
     - name: Install MacOS runtime dependencies
